@@ -1,7 +1,7 @@
 # lacelang-validator (Kotlin)
 
 Reference Kotlin/JVM validator for [Lace](https://github.com/tracedown/lacelang) --
-parser and semantic checks with **100% spec conformance** (v0.9.0). Single
+parser and semantic checks with **100% spec conformance** (v0.9.1). Single
 runtime dependency (Gson for JSON serialization).
 
 Parsing and semantic validation only -- no HTTP runtime, no network

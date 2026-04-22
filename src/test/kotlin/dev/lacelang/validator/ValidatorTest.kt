@@ -47,7 +47,7 @@ class ValidatorTest {
 
     @Test
     fun `AT_LEAST_ONE_CALL`() {
-        val sink = validate(astNode("version" to "0.9.0", "calls" to emptyList<Any>()))
+        val sink = validate(astNode("version" to "0.9.1", "calls" to emptyList<Any>()))
         assertContains(sink.errors.map { it.code }, "AT_LEAST_ONE_CALL")
     }
 
@@ -64,7 +64,7 @@ class ValidatorTest {
     @Test
     fun `EMPTY_CHAIN`() {
         val call = astNode("method" to "get", "url" to "\$u", "chain" to astNode())
-        val sink = validate(astNode("version" to "0.9.0", "calls" to listOf(call)))
+        val sink = validate(astNode("version" to "0.9.1", "calls" to listOf(call)))
         assertContains(sink.errors.map { it.code }, "EMPTY_CHAIN")
     }
 

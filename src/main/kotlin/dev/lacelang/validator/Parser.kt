@@ -36,7 +36,7 @@ private fun stringToExpr(s: String): AstNode {
     return astNode("kind" to "literal", "valueType" to "string", "value" to s)
 }
 
-const val AST_VERSION = "0.9.0"
+const val AST_VERSION = "0.9.1"
 
 private val SCOPE_NAMES: Set<String> = setOf(
     "status", "body", "headers", "bodySize", "totalDelayMs",

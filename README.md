@@ -18,10 +18,10 @@ package separation rule.
 
 ```bash
 # Parse -- check syntax, emit AST
-java -jar build/libs/lacelang-kt-validator-0.1.0-all.jar parse script.lace
+java -jar build/libs/lacelang-kotlin-validator-0.1.0-all.jar parse script.lace
 
 # Validate -- check syntax + semantic rules
-java -jar build/libs/lacelang-kt-validator-0.1.0-all.jar validate script.lace \
+java -jar build/libs/lacelang-kotlin-validator-0.1.0-all.jar validate script.lace \
     --vars-list vars.json --context context.json
 ```
 

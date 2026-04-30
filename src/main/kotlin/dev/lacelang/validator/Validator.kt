@@ -149,7 +149,9 @@ private fun validateCallConfig(
     val red = (cfg["redirects"] as? AstNode) ?: AstNode()
     if ("max" in red) {
         val limit = ctx["maxRedirects"]
-        if (limit is Int && (red["max"] as Int) > limit) {
+        val maxNode = red["max"]
+        val maxVal = if (maxNode is Map<*, *> && maxNode["kind"] == "literal") (maxNode["value"] as? Number)?.toInt() else maxNode as? Int
+        if (limit is Number && maxVal != null && maxVal > limit.toInt()) {
             sink.error("REDIRECTS_MAX_LIMIT", callIndex = idx, field = "redirects.max")
         }
     }
@@ -165,7 +167,9 @@ private fun validateCallConfig(
     }
     if ("ms" in to) {
         val limit = ctx["maxTimeoutMs"]
-        if (limit is Int && (to["ms"] as Int) > limit) {
+        val msNode = to["ms"]
+        val msVal = if (msNode is Map<*, *> && msNode["kind"] == "literal") (msNode["value"] as? Number)?.toInt() else msNode as? Int
+        if (limit is Number && msVal != null && msVal > limit.toInt()) {
             sink.error("TIMEOUT_MS_LIMIT", callIndex = idx, field = "timeout.ms")
         }
     }

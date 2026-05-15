@@ -17,7 +17,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import java.io.File
 
-private const val VERSION = "0.1.0"
+private const val VERSION = "0.1.1"
 
 private fun stripAstMetadata(node: Any?): Any? {
     if (node is List<*>) {

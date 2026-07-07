@@ -35,7 +35,7 @@ class ParserTest {
     @Test
     fun `parse get`() {
         val ast = _parse("get(\"https://example.com\")\n    .expect(status: 200)\n")
-        assertEquals("0.9.2", ast["version"])
+        assertEquals(AST_VERSION, ast["version"])
         assertEquals(1, calls(ast).size)
         assertEquals("get", calls(ast)[0]["method"])
         assertEquals("https://example.com", calls(ast)[0]["url"])

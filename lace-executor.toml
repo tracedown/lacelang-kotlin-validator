@@ -1,6 +1,6 @@
 [executor]
 name        = "lacelang-kt-validator"
-version     = "0.1.1"
+version     = "0.1.2"
 language    = "kotlin"
 conforms_to = ">=0.9.3"
 

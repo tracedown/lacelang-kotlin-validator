@@ -17,7 +17,8 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import java.io.File
 
-private const val VERSION = "0.1.1"
+// VERSION is generated from gradle.properties into BuildInfo.kt (the
+// generateVersionInfo build task), so it never drifts from the released version.
 
 private fun stripAstMetadata(node: Any?): Any? {
     if (node is List<*>) {

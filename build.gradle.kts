@@ -7,8 +7,7 @@ plugins {
     id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "dev.lacelang"
-version = "0.1.2"
+// group and version come from gradle.properties (single source of truth).
 
 repositories {
     mavenLocal()
@@ -32,6 +31,43 @@ tasks.test {
 kotlin {
     jvmToolchain(17)
 }
+
+// ── Version single-source ──
+// The version lives only in gradle.properties. Generate the runtime VERSION
+// constant from it so the CLI banner can never drift from the released version.
+val generateVersionInfo by tasks.registering {
+    val outputDir = layout.buildDirectory.dir("generated/version/kotlin")
+    val ver = project.version.toString()
+    inputs.property("version", ver)
+    outputs.dir(outputDir)
+    doLast {
+        val file = outputDir.get().file("dev/lacelang/validator/BuildInfo.kt").asFile
+        file.parentFile.mkdirs()
+        file.writeText(
+            "// Generated from the project version (gradle.properties) — do not edit.\n" +
+                "package dev.lacelang.validator\n\nconst val VERSION = \"$ver\"\n",
+        )
+    }
+}
+kotlin.sourceSets.named("main") { kotlin.srcDir(generateVersionInfo) }
+
+// Name the fat jar without a version so lace-executor.toml and the release
+// workflow reference it by a stable path.
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveFileName.set("lacelang-kt-validator-all.jar")
+}
+
+// Fail the build if the Lace manifest's version drifts from the project version.
+val verifyManifestVersion by tasks.registering {
+    doLast {
+        val declared = Regex("""(?m)^version\s*=\s*"([^"]+)"""")
+            .find(file("lace-executor.toml").readText())?.groupValues?.get(1)
+        require(declared == project.version.toString()) {
+            "lace-executor.toml version ($declared) != project version (${project.version}) — update lace-executor.toml."
+        }
+    }
+}
+tasks.named("check") { dependsOn(verifyManifestVersion) }
 
 // The shadow plugin registers a `shadowRuntimeElements` variant that carries the
 // fat CLI jar. Keep the fat jar for the GitHub release, but never publish it to

@@ -18,7 +18,7 @@ jobs:
       - name: Read version
         id: version
         run: |
-          version=$(grep '^version' lace-executor.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+          version=$(grep '^version=' gradle.properties | cut -d= -f2)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
@@ -60,7 +60,7 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
-            build/libs/kotlin-validator-${{ steps.version.outputs.version }}-all.jar \
+            build/libs/lacelang-kt-validator-all.jar \
             --title "Lace Kotlin Validator ${{ steps.version.outputs.tag }}" \
             --notes "Kotlin validator for Lace ${{ steps.version.outputs.tag }}."
         env:

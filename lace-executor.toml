@@ -1,12 +1,12 @@
 [executor]
 name        = "lacelang-kt-validator"
-version     = "0.1.2"
+version     = "0.1.3"
 language    = "kotlin"
 conforms_to = ">=0.9.3"
 
 [adapter]
-parse    = "java -jar build/libs/lacelang-kt-validator-0.1.1-all.jar parse {script}"
-validate = "java -jar build/libs/lacelang-kt-validator-0.1.1-all.jar validate {script} --vars-list {vars_list} --context {context}"
+parse    = "java -jar build/libs/lacelang-kt-validator-all.jar parse {script}"
+validate = "java -jar build/libs/lacelang-kt-validator-all.jar validate {script} --vars-list {vars_list} --context {context}"
 timeout_seconds = 30
 
 [conformance]

@@ -41,6 +41,15 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: ./gradlew shadowJar
 
+      - name: Publish to Maven Central
+        if: steps.check.outputs.exists == 'false'
+        run: ./gradlew publishToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+
       - name: Create tag
         if: steps.check.outputs.exists == 'false'
         run: |
@@ -51,8 +60,8 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
-            build/libs/lacelang-kt-validator-${{ steps.version.outputs.version }}-all.jar \
-            --title "lacelang-kt-validator ${{ steps.version.outputs.tag }}" \
+            build/libs/kotlin-validator-${{ steps.version.outputs.version }}-all.jar \
+            --title "Lace Kotlin Validator ${{ steps.version.outputs.tag }}" \
             --notes "Kotlin validator for Lace ${{ steps.version.outputs.tag }}."
         env:
           GH_TOKEN: ${{ github.token }}

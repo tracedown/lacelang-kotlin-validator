@@ -1,5 +1,7 @@
 # lacelang-validator (Kotlin)
 
+[![Maven Central](https://img.shields.io/maven-central/v/dev.lacelang/kotlin-validator)](https://central.sonatype.com/artifact/dev.lacelang/kotlin-validator)
+
 Reference Kotlin/JVM validator for [Lace](https://github.com/tracedown/lacelang) --
 parser and semantic checks with **100% spec conformance**. Single
 runtime dependency (Gson for JSON serialization).

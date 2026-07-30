@@ -10,6 +10,11 @@ package dev.lacelang.validator
 
 private val CHAIN_ORDER: List<String> = listOf("expect", "check", "assert", "store", "wait")
 private val CORE_FUNCS: Set<String> = setOf("json", "form", "schema")
+// Functions usable only inside `.assert()` conditions (spec S8, S4.7). Anywhere
+// else they are rejected exactly like any unknown name (UNKNOWN_FUNCTION).
+private val ASSERT_FUNCS: Set<String> = setOf("count", "includes")
+// Exact argument counts for the assert-only functions (spec S8).
+private val ASSERT_FUNC_ARITY: Map<String, Int> = mapOf("count" to 1, "includes" to 2)
 private val OP_VALUES: Set<String> = setOf("lt", "lte", "eq", "neq", "gte", "gt")
 private val TIMEOUT_ACTIONS: Set<String> = setOf("fail", "warn", "retry")
 
@@ -416,9 +421,13 @@ private fun walkExpr(
             val args = (expr["args"] as? List<Any?>) ?: emptyList()
             if (name in CORE_FUNCS) {
                 checkCoreFuncArgs(name, args, sink, ctx, varsSet)
+            } else if (name in ASSERT_FUNCS && ctx.chainMethod == "assert") {
+                checkAssertFuncArgs(name, args, sink, ctx)
             } else if (ctx.allowExtensionFuncs) {
                 // extension contexts accept anything
             } else {
+                // count/includes outside an assert condition land here too -- they are
+                // unknown everywhere except `.assert()`.
                 sink.error("UNKNOWN_FUNCTION", callIndex = ctx.callIndex, chainMethod = ctx.chainMethod, field = name)
             }
             for (a in args) {
@@ -470,5 +479,18 @@ private fun checkCoreFuncArgs(
                 sink.error("SCHEMA_VAR_UNKNOWN", callIndex = ctx.callIndex, chainMethod = ctx.chainMethod, field = argName)
             }
         }
+    }
+}
+
+private fun checkAssertFuncArgs(
+    name: String,
+    args: List<Any?>,
+    sink: DiagnosticSink,
+    ctx: ExprCtx,
+) {
+    // Arity only -- arguments are arbitrary expressions (spec S8): count(x),
+    // includes(search, x). A wrong count is a FUNC_ARG_TYPE error.
+    if (args.size != ASSERT_FUNC_ARITY[name]) {
+        sink.error("FUNC_ARG_TYPE", callIndex = ctx.callIndex, chainMethod = ctx.chainMethod, field = name)
     }
 }

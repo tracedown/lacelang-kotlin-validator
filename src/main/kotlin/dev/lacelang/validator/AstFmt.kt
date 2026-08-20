@@ -19,6 +19,8 @@ private val BINARY_PRIORITY: Map<String, Int> = mapOf(
     "*" to 6, "/" to 6, "%" to 6,
 )
 
+private val IDENT_KEY = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
+
 private val gson = Gson()
 
 fun fmt(expr: Any?): String {
@@ -85,7 +87,7 @@ fun fmt(expr: Any?): String {
     if (k == "objectLit") {
         @Suppress("UNCHECKED_CAST")
         val entries = (node["entries"] as? List<Map<String, Any?>>) ?: emptyList()
-        val inner = entries.joinToString(", ") { "${it["key"]}: ${fmt(it["value"])}" }
+        val inner = entries.joinToString(", ") { "${fmtObjectKey(it["key"])}: ${fmt(it["value"])}" }
         return "{$inner}"
     }
     if (k == "arrayLit") {
@@ -94,6 +96,40 @@ fun fmt(expr: Any?): String {
         return "[${items.joinToString(", ") { fmt(it) }}]"
     }
     return "<unknown>"
+}
+
+/**
+ * Object keys re-parse bare only when they are plain identifiers; anything
+ * else (numeric, hyphenated, empty, punctuated) must be emitted as a quoted
+ * string literal so the rendered expression parses back to the same AST.
+ */
+private fun fmtObjectKey(key: Any?): String {
+    val name = key?.toString() ?: ""
+    if (IDENT_KEY.matches(name)) return name
+    return jsonString(name)
+}
+
+/** Render [s] as a JSON string literal, escaping per RFC 8259. */
+private fun jsonString(s: String): String {
+    val sb = StringBuilder(s.length + 2)
+    sb.append('"')
+    for (ch in s) {
+        when (ch) {
+            '"' -> sb.append("\\\"")
+            '\\' -> sb.append("\\\\")
+            '\n' -> sb.append("\\n")
+            '\r' -> sb.append("\\r")
+            '\t' -> sb.append("\\t")
+            else ->
+                if (ch < ' ') {
+                    sb.append("\\u").append(ch.code.toString(16).padStart(4, '0'))
+                } else {
+                    sb.append(ch)
+                }
+        }
+    }
+    sb.append('"')
+    return sb.toString()
 }
 
 private fun fmtVarPath(path: Any?): String {

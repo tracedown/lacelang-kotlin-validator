@@ -1,10 +1,9 @@
-import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.4.10"
     application
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.vanniktech.maven.publish") version "0.30.0"
+    id("com.gradleup.shadow") version "9.6.1"
+    id("com.vanniktech.maven.publish") version "0.37.0"
 }
 
 // group and version come from gradle.properties (single source of truth).
@@ -15,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation("com.google.code.gson:gson:2.14.0")
 
     testImplementation(kotlin("test"))
 }
@@ -35,7 +34,7 @@ kotlin {
 // ── Version single-source ──
 // The version lives only in gradle.properties. Generate the runtime VERSION
 // constant from it so the CLI banner can never drift from the released version.
-val generateVersionInfo by tasks.registering {
+val generateVersionInfo = tasks.register("generateVersionInfo") {
     val outputDir = layout.buildDirectory.dir("generated/version/kotlin")
     val ver = project.version.toString()
     inputs.property("version", ver)
@@ -58,12 +57,18 @@ tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJ
 }
 
 // Fail the build if the Lace manifest's version drifts from the project version.
-val verifyManifestVersion by tasks.registering {
+val verifyManifestVersion = tasks.register("verifyManifestVersion") {
+    // Captured at configuration time: Task.project is unavailable during
+    // execution under the configuration cache (Gradle 10 makes it an error).
+    val manifest = layout.projectDirectory.file("lace-executor.toml")
+    val projectVersion = project.version.toString()
+    inputs.file(manifest)
+    inputs.property("version", projectVersion)
     doLast {
         val declared = Regex("""(?m)^version\s*=\s*"([^"]+)"""")
-            .find(file("lace-executor.toml").readText())?.groupValues?.get(1)
-        require(declared == project.version.toString()) {
-            "lace-executor.toml version ($declared) != project version (${project.version}) — update lace-executor.toml."
+            .find(manifest.asFile.readText())?.groupValues?.get(1)
+        require(declared == projectVersion) {
+            "lace-executor.toml version ($declared) != project version ($projectVersion) — update lace-executor.toml."
         }
     }
 }
@@ -76,7 +81,7 @@ tasks.named("check") { dependsOn(verifyManifestVersion) }
     .withVariantsFromConfiguration(configurations["shadowRuntimeElements"]) { skip() }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
+    publishToMavenCentral(automaticRelease = true)
     signAllPublications()
 
     coordinates("dev.lacelang", "kotlin-validator", version.toString())

@@ -28,7 +28,7 @@ done
 
 # ── Read current versions ─────────────────────────────────────────────
 
-cur_pkg=$(grep -oP '^version = "\K[^"]+' "$SCRIPT_DIR/build.gradle.kts")
+cur_pkg=$(grep -oP '^version=\K[^\s]+' "$SCRIPT_DIR/gradle.properties")
 cur_spec=$(grep -oP 'AST_VERSION = "\K[^"]+' "$SCRIPT_DIR/src/main/kotlin/dev/lacelang/validator/Parser.kt")
 
 # ── Auto-patch if no explicit package version ─────────────────────────
@@ -42,15 +42,15 @@ fi
 
 if [[ -n "$new_pkg" ]]; then
     echo "Package: $cur_pkg -> $new_pkg"
-    sed -i "s/^version = \"$cur_pkg\"/version = \"$new_pkg\"/" \
-        "$SCRIPT_DIR/build.gradle.kts"
+    sed -i "s/^version=$cur_pkg$/version=$new_pkg/" \
+        "$SCRIPT_DIR/gradle.properties"
     sed -i "s/version     = \"$cur_pkg\"/version     = \"$new_pkg\"/" \
         "$SCRIPT_DIR/lace-executor.toml"
     sed -i "s/lacelang-kt-validator-$cur_pkg/lacelang-kt-validator-$new_pkg/g" \
         "$SCRIPT_DIR/lace-executor.toml"
     sed -i "s/VERSION = \"$cur_pkg\"/VERSION = \"$new_pkg\"/" \
         "$SCRIPT_DIR/src/main/kotlin/dev/lacelang/validator/Cli.kt"
-    echo "  build.gradle.kts, Cli.kt, lace-executor.toml"
+    echo "  gradle.properties, Cli.kt, lace-executor.toml"
 fi
 
 # ── Apply spec version ────────────────────────────────────────────────

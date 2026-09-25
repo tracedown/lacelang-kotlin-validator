@@ -811,6 +811,10 @@ class Parser(private val tokens: List<Token>) {
 }
 
 fun parse(source: String): AstNode {
-    val tokens = tokenize(source)
+    val tokens = try {
+        tokenize(source)
+    } catch (e: LexError) {
+        throw ParseError(e.message, e.line)
+    }
     return Parser(tokens).parseScript()
 }

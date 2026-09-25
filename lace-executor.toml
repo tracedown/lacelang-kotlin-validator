@@ -1,8 +1,8 @@
 [executor]
 name        = "lacelang-kt-validator"
-version     = "0.1.6"
+version     = "0.1.7"
 language    = "kotlin"
-conforms_to = ">=0.9.4"
+conforms_to = ">=0.9.7"
 
 [adapter]
 parse    = "java -jar build/libs/lacelang-kt-validator-all.jar parse {script}"
